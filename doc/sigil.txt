@@ -1,0 +1,53 @@
+*sigil.txt*  Variable panel for Vim — 40+ languages
+
+==============================================================================
+COMMANDS                                                       *sigil-commands*
+
+:Sigil          Open / refresh the variable panel for the current file
+:SigilX     	Close the panel
+:SigilR   		Rename variable under cursor across the whole file
+
+==============================================================================
+KEYBINDINGS                                                       *sigil-keys*
+
+Panel: ~
+  <Enter>   Jump to first occurrence, close panel
+  o         Jump, keep panel open
+  n / p     Cycle occurrences
+  r         Rename selected variable
+  /         Filter (type to narrow)
+  <Esc>     Clear filter
+  q         Close panel
+
+Source window: ~
+  <leader>s   Open / refresh panel
+  <leader>n   Next occurrence of word under cursor
+  <leader>p   Previous occurrence
+  <leader>r   Rename word under cursor
+
+==============================================================================
+CONFIGURATION                                                  *sigil-config*
+
+g:sigil_height    Panel height in lines (default: 12)
+g:sigil_python    Python executable (default: 'python3')
+g:sigil_script    Path to sigil.py — auto-resolved, rarely needed
+
+Example: >
+    let g:sigil_height = 15
+    let g:sigil_python = 'python3'
+<
+==============================================================================
+LANGUAGES                                                    *sigil-languages*
+
+Python uses a full AST parser — rich context (global, local, param, loop,
+comp, except). All other languages use Universal Ctags:
+
+    brew install universal-ctags       (macOS)
+    sudo apt install universal-ctags   (Debian/Ubuntu)
+    sudo dnf install ctags             (Fedora)
+
+Supported: C, C++, C#, Go, Rust, Java, Kotlin, JavaScript, TypeScript,
+PHP, Ruby, Perl, R, Julia, SQL, Bash, Vim, Fortran, OCaml, Pascal, and more.
+
+==============================================================================
+vim:tw=78:ts=4:ft=help:norl:

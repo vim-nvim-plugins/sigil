@@ -1,0 +1,44 @@
+# Backup
+/backup/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+
+# Debug
+*.dSYM/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+**/._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# Release archives
+*.tar.gz
+*.zip
+
+# Python
+__pycache__/
+*.pyc
+*.swp
+*.swo
