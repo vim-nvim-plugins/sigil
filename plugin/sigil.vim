@@ -19,7 +19,9 @@ if !exists('g:sigil_python')
 	endfor
 endif
 
-let s:has_ctags = executable('ctags')
+" -1 = not checked yet. Checked on first parse, not at startup: macOS ships a BSD ctags
+" that passes executable() but lacks every flag sigil uses, so ask for Universal Ctags.
+let s:has_ctags = -1
 
 highlight default SigilMatch   ctermbg=58  guibg=#5f5f00 ctermfg=228 guifg=#ffff87
 highlight default SigilCurrent ctermbg=136 guibg=#af8700 ctermfg=232 guifg=#080808
@@ -148,6 +150,9 @@ endfunction
 function! s:Parse(filter)
 	let l:ext = fnamemodify(s:source_file, ':e')
 	let l:use_python = (l:ext ==# 'py' && g:sigil_python != '')
+	if !l:use_python && s:has_ctags == -1
+		let s:has_ctags = executable('ctags') && system('ctags --version') =~# 'Universal Ctags'
+	endif
 	if !l:use_python && !s:has_ctags
 		echohl ErrorMsg
 		echo 'Sigil: needs Python or universal-ctags. Install ctags: brew install universal-ctags'

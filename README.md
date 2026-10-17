@@ -1,8 +1,8 @@
 # Sigil
 ## Overview
-A clean little vim plugin that scans the active file and lists every variable in a seperate panel.
-<p align="center"><img src="./assets/wide.jpg" alt="Sigil-Panel" width="600" height="200" /></p>
-<p align="center"><img src="./assets/full.jpg" alt="Sigil-Full" width="600" height="400" /></p>
+A clean little vim plugin that scans the active file and lists every variable in a separate panel.
+<p align="center"><img src="./assets/wide.png" alt="Sigil-Panel" width="600" height="200" /></p>
+<p align="center"><img src="./assets/full.png" alt="Sigil-Full" width="600" height="400" /></p>
 
 - **Display Scope**: Line numbers variables occur
 - **Features**: Jump, cycle, filter, rename, and supports 40+ languages currently.
@@ -65,7 +65,7 @@ let g:sigil_python = 'python3'
 | `<leader>p`    | Previous occurrence |
 | `<leader>r`    | Rename word under cursor |
 | `:Sigil`       | Open panel |
-| `:SigilX	     | Close panel |
+| `:SigilX`     | Close panel |
 | `:SigilR` 	 | Rename under cursor |
 
 **Inside the panel:**
