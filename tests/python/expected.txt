@@ -1,0 +1,14 @@
+global|LIMIT|2,7,14,16
+param|value|3,4
+param|factor|3,4
+param|rest|3,5
+param|opts|3
+local|total|4,6,8
+local|i|5,6
+local|x|5,6
+local|squares|7,8
+local|n|7
+field|size|11
+param|self|12,13,14
+param|w|12,13
+global|total|16,17

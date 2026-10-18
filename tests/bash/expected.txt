@@ -1,0 +1,2 @@
+global|name|1,4
+local|who|3,4

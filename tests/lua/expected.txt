@@ -1,0 +1,5 @@
+global|limit|1,4,9
+param|n|2,3
+param|step|2,5
+local|acc|3,5,7
+local|i|4,5

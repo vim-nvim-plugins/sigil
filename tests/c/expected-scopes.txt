@@ -1,0 +1,9 @@
+global|counter|2,6,13|1-15
+field|x|3|3-3
+field|y|3|3-3
+param|a|4,5|4-9
+param|b|4,5,7|4-9
+local|sum|5,6,7,8|4-9
+local|i|7|7-7
+local|p|11,12|10-15
+local|sum|12,13|10-15

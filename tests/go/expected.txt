@@ -1,0 +1,6 @@
+global|total|5,9,18
+local|a|7,8
+local|b|7,8,10
+local|sum|8,9,11,13
+local|i|10,11
+local|s|17,18

@@ -1,0 +1,29 @@
+# Grammars sigil is built with. One line each:
+#   name  repo  revision  subdir  aliases (Vim filetypes and file extensions sigil maps to it)
+# Revisions match what nvim-treesitter pins (NVTS below), so its locals queries compile against them.
+# Adding a language = one line here, if nvim-treesitter ships runtime/queries/<name>/locals.scm
+# and the grammar repo commits src/parser.c (swift and perl do not: they need the tree-sitter CLI).
+TREE_SITTER  tree-sitter/tree-sitter        v0.26.13
+NVTS         nvim-treesitter/nvim-treesitter ca581c3436fc2b236847f5b739ebc263739e5ca6
+
+bash        tree-sitter/tree-sitter-bash            a06c2e4415e9bc0346c6b86d401879ffb44058f7  .           sh bash zsh
+c           tree-sitter/tree-sitter-c               b780e47fc780ddc8da13afa35a3f4ed5c157823d  .           c h
+c_sharp     tree-sitter/tree-sitter-c-sharp         v0.23.5                                   .           cs csharp
+cpp         tree-sitter/tree-sitter-cpp             c009222808634c1014f82438d4883753516a2c24  .           cpp cc cxx c++ hpp hh hxx
+go          tree-sitter/tree-sitter-go              2346a3ab1bb3857b48b29d779a1ef9799a248cd7  .           go
+java        tree-sitter/tree-sitter-java            e10607b45ff745f5f876bfa3e94fbcc6b44bdc11  .           java
+javascript  tree-sitter/tree-sitter-javascript      58404d8cf191d69f2674a8fd507bd5776f46cb11  .           javascript javascriptreact js mjs cjs jsx
+julia       tree-sitter-grammars/tree-sitter-julia  9b92fddcedb55003b32601238653b121bc46f544  .           julia jl
+kotlin      fwcd/tree-sitter-kotlin                 1852ea17b7f60fb3f9d84e0b1555d56b46b39fb1  .           kotlin kt kts
+lua         tree-sitter-grammars/tree-sitter-lua    10fe0054734eec83049514ea2e718b2a56acd0c9  .           lua
+ocaml       tree-sitter/tree-sitter-ocaml           3b2e14e0697d405c9aa0beddfa09b71f45abc504  grammars/ocaml  ocaml ml
+pascal      Isopod/tree-sitter-pascal               042119eca2e18a60e56317fb06ee3ba5c32cb447  .           pascal pas pp
+php         tree-sitter/tree-sitter-php             58d5643086ae60e93a3746cca648363ee97c8761  php         php
+python      tree-sitter/tree-sitter-python          v0.25.0                                   .           python py pyw pyi
+r           r-lib/tree-sitter-r                     58a22794466c0fc15b0d3b40531db751593721e8  .           r R
+ruby        tree-sitter/tree-sitter-ruby            ad907a69da0c8a4f7a943a7fe012712208da6dee  .           ruby rb
+rust        tree-sitter/tree-sitter-rust            77a3747266f4d621d0757825e6b11edcbf991ca5  .           rust rs
+tsx         tree-sitter/tree-sitter-typescript      75b3874edb2dc714fb1fd77a32013d0f8699989f  tsx         tsx typescriptreact
+typescript  tree-sitter/tree-sitter-typescript      75b3874edb2dc714fb1fd77a32013d0f8699989f  typescript  typescript ts mts cts
+vim         tree-sitter-grammars/tree-sitter-vim    039c8d0aa1deae00ddeb0374dd70bcc0ec56938d  .           vim
+zig         tree-sitter-grammars/tree-sitter-zig    6479aa13f32f701c383083d8b28360ebd682fb7d  .           zig

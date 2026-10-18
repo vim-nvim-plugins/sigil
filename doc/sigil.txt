@@ -1,4 +1,4 @@
-*sigil.txt*  Variable panel for Vim — 40+ languages
+*sigil.txt*  Variable panel for Vim — 21 languages, one tree-sitter parser
 
 ==============================================================================
 COMMANDS                                                       *sigil-commands*
@@ -29,25 +29,45 @@ Source window: ~
 CONFIGURATION                                                  *sigil-config*
 
 g:sigil_height    Panel height in lines (default: 12)
-g:sigil_python    Python executable (default: 'python3')
-g:sigil_script    Path to sigil.py — auto-resolved, rarely needed
+g:sigil_binary    Path to the helper (default: bin/sigil inside the plugin)
 
 Example: >
     let g:sigil_height = 15
-    let g:sigil_python = 'python3'
 <
 ==============================================================================
 LANGUAGES                                                    *sigil-languages*
 
-Python uses a full AST parser — rich context (global, local, param, loop,
-comp, except). All other languages use Universal Ctags:
+Every language goes through the same helper, bin/sigil: tree-sitter parses
+the file and that language's locals query (from nvim-treesitter) marks
+scopes, definitions and uses. Each use is matched to the nearest definition
+of the same name, so the panel lists every line a variable occurs on.
 
-    brew install universal-ctags       (macOS)
-    sudo apt install universal-ctags   (Debian/Ubuntu)
-    sudo dnf install ctags             (Fedora)
+Contexts: global, local, param, field.
 
-Supported: C, C++, C#, Go, Rust, Java, Kotlin, JavaScript, TypeScript,
-PHP, Ruby, Perl, R, Julia, SQL, Bash, Vim, Fortran, OCaml, Pascal, and more.
+Build the helper once (needs a C compiler, make, curl, tar): >
+    cd <plugin dir> && make
+<
+With vim-plug: >
+    Plug 'vim-nvim-plugins/sigil', { 'do': 'make' }
+<
+Supported: Bash, C, C#, C++, Go, Java, JavaScript (+JSX), Julia, Kotlin, Lua,
+OCaml, Pascal, PHP, Python, R, Ruby, Rust, TSX, TypeScript, Vim script, Zig.
+`bin/sigil --list` prints each language with the filetypes it covers.
+
+The language comes from the buffer's 'filetype', or the file extension when
+'filetype' is empty.
+
+==============================================================================
+OUTSIDE VIM                                                      *sigil-cli*
+
+The helper runs on its own: >
+    bin/sigil <language|extension> <file>
+    bin/sigil --scopes <language|extension> <file>
+<
+Output is one variable per line: context|name|line,line,...
+--scopes keeps same-named variables in different scopes apart and appends
+the scope's line range (|first-last). SKILL.md in the plugin directory
+describes the same for AI agents.
 
 ==============================================================================
 vim:tw=78:ts=4:ft=help:norl:

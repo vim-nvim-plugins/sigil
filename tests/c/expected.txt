@@ -1,0 +1,8 @@
+global|counter|2,6,13
+field|x|3
+field|y|3
+param|a|4,5
+param|b|4,5,7
+local|sum|5,6,7,8,12,13
+local|i|7
+local|p|11,12
