@@ -1,0 +1,63 @@
+# Build and test bin/sigil on Linux (static, runs on any distro incl. Alpine) and macOS on every
+# push and pull request. On a vX.Y.Z tag, attach the binaries to that GitHub release so
+# `make download` can fetch them.
+name: build
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+jobs:
+  linux:
+    strategy:
+      matrix:
+        include:
+          - { runner: ubuntu-24.04, arch: x86_64 }
+          - { runner: ubuntu-24.04-arm, arch: arm64 }
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: build and test in Alpine (musl, BusyBox), linked statically
+        run: |
+          docker run --rm -v "$PWD:/w" -w /w -e CFLAGS="-O2 -static" alpine:3.20 \
+            sh -c 'apk add -q build-base curl tar && make test'
+          cp bin/sigil sigil-linux-${{ matrix.arch }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sigil-linux-${{ matrix.arch }}
+          path: sigil-linux-${{ matrix.arch }}
+
+  macos:
+    runs-on: macos-14
+    env:
+      CFLAGS: -O2 -arch x86_64 -arch arm64
+      MACOSX_DEPLOYMENT_TARGET: '11.0'
+    steps:
+      - uses: actions/checkout@v4
+      - run: make test
+      - name: one file per CPU (half the download of a universal binary)
+        run: |
+          lipo bin/sigil -thin arm64 -output sigil-macos-arm64
+          lipo bin/sigil -thin x86_64 -output sigil-macos-x86_64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sigil-macos
+          path: sigil-macos-*
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [linux, macos]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+      - run: |
+          gh release create "$GITHUB_REF_NAME" sigil-* --repo "$GITHUB_REPOSITORY" \
+            --title "sigil $GITHUB_REF_NAME" --notes "Prebuilt bin/sigil for Linux and macOS: \`make download\` (see README)." \
+          || gh release upload "$GITHUB_REF_NAME" sigil-* --repo "$GITHUB_REPOSITORY" --clobber

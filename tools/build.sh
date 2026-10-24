@@ -24,12 +24,14 @@ set -- $(pin TREE_SITTER); fetch tree-sitter "$1" "$2"
 set -- $(pin NVTS);        fetch nvts "$1" "$2"
 langs | while read -r name repo rev sub aliases; do fetch "g-$name" "$repo" "$rev"; done
 
-# locals query = its "; inherits:" bases first, then its own patterns
+# locals query = its "; inherits:" bases first, then its own patterns, then sigil's fixes for
+# that language from queries/<lang>.scm (patterns upstream lacks; see the comments there)
 query() (	# subshell: the recursion must not clobber $f
 	f="deps/nvts/runtime/queries/$1/locals.scm"
 	[ -f "$f" ] || { echo "no locals query for $1 in nvim-treesitter" >&2; exit 1; }
 	for base in $(sed -n '1s/^; inherits: *//p' "$f" | tr ',' ' ' | tr -d '()'); do query "$base"; done
 	sed '1{/^; inherits:/d;}' "$f"
+	[ ! -f "queries/$1.scm" ] || cat "queries/$1.scm"
 )
 
 gen=build/langs.c

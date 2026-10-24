@@ -1,5 +1,5 @@
 " sigil.vim - Variable panel for Vim  github.com/vim-nvim-plugins/sigil
-" :Sigil  :SigilX or :q  :SigilR
+" :Sigil  :Sigil close (:SigilX or :q)  :Sigil rename (:SigilR)
 " Panel: Enter=jump  o=jump(keep)  n/p=cycle  r=rename  /=filter  Esc=clear  q=close
 " Source: <leader>s=open  <leader>n=next  <leader>p=prev  <leader>r=rename
 
@@ -29,22 +29,23 @@ function! s:BufferTempfile()
 	return l:tmp
 endfunction
 
-function! s:Run(file, lang)
+" a:1: extra helper flag (--positions adds a "pos" list of "line:col" per item).
+function! s:Run(file, lang, ...)
 	if !executable(g:sigil_binary)
 		echohl ErrorMsg
-		echo 'Sigil: helper not built. Run make in ' . fnamemodify(g:sigil_binary, ':h:h')
+		echo 'Sigil: no helper. Run make download (or make) in ' . fnamemodify(g:sigil_binary, ':h:h')
 		echohl None
 		return []
 	endif
-	let l:out = system(shellescape(g:sigil_binary) . ' ' . shellescape(a:lang) . ' ' . shellescape(a:file))
+	let l:out = system(shellescape(g:sigil_binary) . ' ' . join(a:000) . ' ' . shellescape(a:lang) . ' ' . shellescape(a:file))
 	if v:shell_error
 		echohl ErrorMsg | echo 'Sigil: ' . substitute(trim(l:out), '^sigil: ', '', '') | echohl None
 		return []
 	endif
 	return map(filter(map(split(l:out, "\n"),
 		\ 'split(v:val, "|")'),
-		\ 'len(v:val) == 3'),
-		\ '{"context": v:val[0], "name": v:val[1], "lines": map(split(v:val[2], ","), "str2nr(v:val)")}')
+		\ 'len(v:val) >= 3'),
+		\ '{"context": v:val[0], "name": v:val[1], "lines": map(split(v:val[2], ","), "str2nr(v:val)"), "pos": split(v:val[2], ",")}')
 endfunction
 
 let s:ctx_rank = {'global': 0, 'param': 1, 'local': 2, 'field': 3}
@@ -55,13 +56,13 @@ function! s:CmpItems(a, b)
 	return a:a.name ==# a:b.name ? 0 : a:a.name ># a:b.name ? 1 : -1
 endfunction
 
-function! s:Parse(filter)
+function! s:Parse(filter, ...)
 	" The buffer's filetype names the language; the extension covers unset filetypes.
 	let l:lang = getbufvar(s:source_buf, '&filetype')
 	if l:lang == '' | let l:lang = fnamemodify(s:source_file, ':e') | endif
 	let l:tmp = s:BufferTempfile()
 	try
-		let l:items = s:Run(l:tmp, l:lang)
+		let l:items = call('s:Run', [l:tmp, l:lang] + a:000)
 	finally
 		call delete(l:tmp)
 	endtry
@@ -216,25 +217,74 @@ function! s:ClearFilter()
 	call s:Render()
 endfunction
 
-function! s:DoRename(old)
+" [line, col] of each occurrence, from an item parsed with --positions.
+function! s:Spans(item)
+	return map(copy(a:item.pos), 'map(split(v:val, ":"), "str2nr(v:val)")')
+endfunction
+
+" Renames in the current buffer exactly the spans given (right to left, so columns stay valid).
+" No spans: the name is not a variable sigil tracks (a function, a builtin), so every whole word.
+function! s:DoRename(old, spans)
 	let l:new = input('Rename "' . a:old . '" to: ')
 	if l:new == '' || l:new == a:old | return | endif
-	call s:FocusSource() | call s:ClearHighlights()
-	execute '%s/\<' . escape(a:old, '/\') . '\>/' . escape(l:new, '/\') . '/g'
-	echo 'Sigil: renamed "' . a:old . '" → "' . l:new . '"'
+	call s:ClearHighlights()
+	if empty(a:spans)
+		execute '%s/\<' . escape(a:old, '/\') . '\>/' . escape(l:new, '/\') . '/g'
+		echo 'Sigil: renamed "' . a:old . '" → "' . l:new . '" (whole file)'
+	else
+		let l:n = 0
+		for [l:l, l:c] in reverse(sort(copy(a:spans), {a, b -> a[0] != b[0] ? a[0] - b[0] : a[1] - b[1]}))
+			let l:text = getline(l:l)
+			if strpart(l:text, l:c - 1, len(a:old)) !=# a:old | continue | endif
+			call setline(l:l, strpart(l:text, 0, l:c - 1) . l:new . strpart(l:text, l:c - 1 + len(a:old)))
+			let l:n += 1
+		endfor
+		echo 'Sigil: renamed "' . a:old . '" → "' . l:new . '" (' . l:n . 'x)'
+	endif
+	" The panel follows its own buffer; a rename elsewhere leaves it alone.
+	if bufnr('%') != s:source_buf | return | endif
 	let s:current = l:new
 	let s:data = s:Parse(s:filter)
 	call s:Render() | call s:Highlight(l:new)
 endfunction
 
+" Panel: everything the row lists (same name and context, every scope).
 function! s:RenameFromPanel()
 	let l:item = s:Item()
-	if !empty(l:item) | call s:DoRename(l:item['name']) | endif
+	if empty(l:item) | return | endif
+	let l:spans = []
+	for l:v in s:Parse('', '--positions')
+		if l:v.name ==# l:item.name && l:v.context ==# l:item.context | let l:spans += s:Spans(l:v) | endif
+	endfor
+	call s:FocusSource()
+	call s:DoRename(l:item['name'], l:spans)
 endfunction
 
+" Cursor: only the variable the cursor is on, in its own scope.
 function! s:RenameUnderCursor()
+	if exists('b:is_sigil') | return s:RenameFromPanel() | endif
 	let l:name = expand('<cword>')
-	if l:name != '' | call s:DoRename(l:name) | endif
+	if l:name == '' | return | endif
+	" Parse this buffer, then hand the panel back its own source (if it has one).
+	let l:panel = [s:source_buf, s:source_file]
+	let [s:source_buf, s:source_file] = [bufnr('%'), expand('%:p')]
+	let l:items = s:Parse('', '--positions')
+	if l:panel[0] != -1 | let [s:source_buf, s:source_file] = l:panel | endif
+	let [l:line, l:col] = [line('.'), col('.')]
+	for l:item in l:items
+		for [l:l, l:c] in s:Spans(l:item)
+			if l:l == l:line && l:c <= l:col && l:col < l:c + len(l:item.name)
+				return s:DoRename(l:item.name, s:Spans(l:item))
+			endif
+		endfor
+	endfor
+	" A variable sigil knows, but not one it can tie this spot to (e.g. `obj.x` at file level):
+	" a whole-file substitute would hit the other variables of that name, so don't guess.
+	if !empty(filter(copy(l:items), 'v:val.name ==# l:name'))
+		echo 'Sigil: can''t tell which "' . l:name . '" this is; rename it from the panel (:Sigil, r)'
+		return
+	endif
+	call s:DoRename(l:name, [])
 endfunction
 
 " Open/Close
@@ -269,7 +319,20 @@ endfunction
 
 " Commands/Maps
 
-command! Sigil  call s:Open()
+" :Sigil [close|rename]; :SigilX and :SigilR are the same as the last two.
+function! s:Command(arg)
+	if a:arg ==# '' | call s:Open()
+	elseif a:arg ==# 'close' | call s:Close()
+	elseif a:arg ==# 'rename' | call s:RenameUnderCursor()
+	else | echohl ErrorMsg | echo 'Sigil: unknown argument "' . a:arg . '" (close, rename)' | echohl None
+	endif
+endfunction
+
+function! s:Complete(...)
+	return "close\nrename"
+endfunction
+
+command! -nargs=? -complete=custom,s:Complete Sigil call s:Command(<q-args>)
 command! SigilX call s:Close()
 command! SigilR call s:RenameUnderCursor()
 

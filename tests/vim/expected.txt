@@ -1,0 +1,6 @@
+global|g:limit|1,5,11
+global|s:count|2,8
+param|value|3,4
+param|factor|3,4
+local|l:total|4,6,9
+local|l:i|5,6

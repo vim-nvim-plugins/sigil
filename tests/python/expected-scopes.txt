@@ -1,4 +1,4 @@
-global|LIMIT|2,7,14,16|1-17
+global|LIMIT|2,7,14,16|1-27
 param|value|3,4|3-8
 param|factor|3,4|3-8
 param|rest|3,5|3-8
@@ -11,4 +11,10 @@ local|n|7|7-7
 field|size|11|10-14
 param|self|12,13,14|12-14
 param|w|12,13|12-14
-global|total|16,17|1-17
+field|w|13,14|12-14
+global|total|16,17|1-27
+param|self|20,21|20-21
+param|w|20,21|20-21
+field|w|21,23,24|20-21
+param|self|22,23,24|22-24
+global|b|26,27|1-27

@@ -4,8 +4,14 @@
 COMMANDS                                                       *sigil-commands*
 
 :Sigil          Open / refresh the variable panel for the current file
-:SigilX     	Close the panel
-:SigilR   		Rename variable under cursor across the whole file
+:SigilX     	Close the panel. Same as :Sigil close
+:SigilR   		Rename the variable under the cursor, in its own scope only.
+			Other variables with the same name, members (obj.name),
+			strings and comments are left alone. On a name sigil does
+			not track (a function, a builtin) it renames every whole
+			word in the file. On a variable it knows but can't tie to
+			this spot (obj.name outside its class) it renames nothing
+			and points to the panel. Same as :Sigil rename
 
 ==============================================================================
 KEYBINDINGS                                                       *sigil-keys*
@@ -14,7 +20,7 @@ Panel: ~
   <Enter>   Jump to first occurrence, close panel
   o         Jump, keep panel open
   n / p     Cycle occurrences
-  r         Rename selected variable
+  r         Rename the selected row's variable (every line it lists)
   /         Filter (type to narrow)
   <Esc>     Clear filter
   q         Close panel
@@ -23,7 +29,7 @@ Source window: ~
   <leader>s   Open / refresh panel
   <leader>n   Next occurrence of word under cursor
   <leader>p   Previous occurrence
-  <leader>r   Rename word under cursor
+  <leader>r   Rename variable under cursor (as :SigilR)
 
 ==============================================================================
 CONFIGURATION                                                  *sigil-config*
@@ -42,13 +48,17 @@ the file and that language's locals query (from nvim-treesitter) marks
 scopes, definitions and uses. Each use is matched to the nearest definition
 of the same name, so the panel lists every line a variable occurs on.
 
-Contexts: global, local, param, field.
+Contexts: global, local, param, field. `self.x`, `this.x`, `@x` count as uses
+of the field x of the class they are in.
 
-Build the helper once (needs a C compiler, make, curl, tar): >
+Get the helper once. Prebuilt for Linux and macOS (needs make, curl): >
+    cd <plugin dir> && make download
+<
+Or build it (also needs a C compiler and tar): >
     cd <plugin dir> && make
 <
 With vim-plug: >
-    Plug 'vim-nvim-plugins/sigil', { 'do': 'make' }
+    Plug 'vim-nvim-plugins/sigil', { 'do': 'make download || make' }
 <
 Supported: Bash, C, C#, C++, Go, Java, JavaScript (+JSX), Julia, Kotlin, Lua,
 OCaml, Pascal, PHP, Python, R, Ruby, Rust, TSX, TypeScript, Vim script, Zig.
@@ -63,10 +73,12 @@ OUTSIDE VIM                                                      *sigil-cli*
 The helper runs on its own: >
     bin/sigil <language|extension> <file>
     bin/sigil --scopes <language|extension> <file>
+    bin/sigil --positions <language|extension> <file>
 <
 Output is one variable per line: context|name|line,line,...
 --scopes keeps same-named variables in different scopes apart and appends
-the scope's line range (|first-last). SKILL.md in the plugin directory
+the scope's line range (|first-last). --positions is --scopes with every
+occurrence as line:col (byte column, 1-based); :SigilR uses it. SKILL.md in the plugin directory
 describes the same for AI agents.
 
 ==============================================================================

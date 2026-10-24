@@ -10,7 +10,9 @@ for d in tests/*/; do
 		out=$(./bin/sigil "$lang" "$f" 2>&1)
 		if [ "${UPDATE:-0}" = 1 ]; then
 			printf '%s\n' "$out" > "$d/expected.txt"
-			[ -f "$d/expected-scopes.txt" ] && ./bin/sigil --scopes "$lang" "$f" > "$d/expected-scopes.txt"
+			for m in scopes positions; do
+				[ -f "$d/expected-$m.txt" ] && ./bin/sigil --$m "$lang" "$f" > "$d/expected-$m.txt"
+			done
 			continue
 		fi
 		if printf '%s\n' "$out" | diff -u "$d/expected.txt" - > /dev/null; then
@@ -18,13 +20,15 @@ for d in tests/*/; do
 		else
 			echo "FAIL  $lang"; printf '%s\n' "$out" | diff -u "$d/expected.txt" - | sed 's/^/      /'; fail=1
 		fi
-		[ -f "$d/expected-scopes.txt" ] || continue
-		out=$(./bin/sigil --scopes "$lang" "$f" 2>&1)
-		if printf '%s\n' "$out" | diff -u "$d/expected-scopes.txt" - > /dev/null; then
-			echo "ok    $lang --scopes"
-		else
-			echo "FAIL  $lang --scopes"; printf '%s\n' "$out" | diff -u "$d/expected-scopes.txt" - | sed 's/^/      /'; fail=1
-		fi
+		for m in scopes positions; do
+			[ -f "$d/expected-$m.txt" ] || continue
+			out=$(./bin/sigil --$m "$lang" "$f" 2>&1)
+			if printf '%s\n' "$out" | diff -u "$d/expected-$m.txt" - > /dev/null; then
+				echo "ok    $lang --$m"
+			else
+				echo "FAIL  $lang --$m"; printf '%s\n' "$out" | diff -u "$d/expected-$m.txt" - | sed 's/^/      /'; fail=1
+			fi
+		done
 	done
 done
 exit $fail

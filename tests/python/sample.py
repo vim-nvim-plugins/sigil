@@ -15,3 +15,13 @@ class Box:
 
 total = scale(LIMIT)
 print("total LIMIT", total)  # LIMIT in a comment
+
+class Pair:
+    def __init__(self, w):
+        self.w = w
+    def grow(self):
+        self.w += 1
+        return self.w
+
+b = Box(1)
+print(b.w)

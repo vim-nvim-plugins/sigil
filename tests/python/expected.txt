@@ -9,6 +9,8 @@ local|x|5,6
 local|squares|7,8
 local|n|7
 field|size|11
-param|self|12,13,14
-param|w|12,13
+param|self|12,13,14,20,21,22,23,24
+param|w|12,13,20,21
+field|w|13,14,21,23,24
 global|total|16,17
+global|b|26,27

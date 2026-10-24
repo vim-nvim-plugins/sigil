@@ -1,0 +1,9 @@
+global|limit|1,4,9
+global|scale|2,9
+param|value|2,3,6,7
+param|factor|2,3
+local|total|3,5,7,8
+local|go|4,5
+param|i|4
+param|acc|4
+global|twice|6

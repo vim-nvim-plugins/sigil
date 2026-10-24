@@ -1,0 +1,5 @@
+global|limit|2,7,17,18
+param|value|3,6,10,13
+param|factor|3,6
+local|total|4,6,7,8,11,13,14
+local|i|4,7

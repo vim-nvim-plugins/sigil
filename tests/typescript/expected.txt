@@ -1,0 +1,7 @@
+global|limit|1,4,15
+param|value|2,3,7,8
+param|factor|2,3
+local|total|3,4,5,8,9
+local|i|4
+field|w|12,13
+param|w|13
